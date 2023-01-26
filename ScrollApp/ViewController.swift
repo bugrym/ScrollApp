@@ -15,16 +15,15 @@ class Cell: UICollectionViewCell {
     }
 }
 
-class ViewController: UIViewController {
+protocol BusinessInterface: NSObject {
+    func addItem()
+    func deleteItem(at index: Int)
+}
 
+
+class ViewController: UIViewController, BusinessInterface {
     private var collection: UICollectionView!
-    private var dataSource: Int = 0 {
-        didSet {
-//            collection.reloadData()
-//            let indexPath = IndexPath(item: dataSource - 1, section: 0)
-//            collection.scrollToItem(at: indexPath, at: .right, animated: true)
-        }
-    }
+    private var dataSource: Int = 0
     
     private lazy var addBtn: UIButton = {
         let btn = UIButton()
@@ -71,11 +70,29 @@ class ViewController: UIViewController {
     
     @objc private
     func addBtnTap() {
-        dataSource += 1
-        
-        collection.reloadData()
-        let indexPath = IndexPath(item: dataSource - 1, section: 0)
-        collection.scrollToItem(at: indexPath, at: .right, animated: true)
+        addItem()
+    }
+    
+    func addItem() {
+        DispatchQueue.main.async { [weak self] in
+            guard let source = self?.dataSource else { return }
+            self?.dataSource += 1 
+            
+            self?.collection.reloadData()
+            let indexPath = IndexPath(item: source - 1, section: 0)
+            self?.collection.scrollToItem(at: indexPath, at: .right, animated: true)
+        }
+    }
+    
+    func deleteItem(at index: Int) {
+        DispatchQueue.main.async { [weak self] in
+            self?.dataSource -= 1
+            
+            UIView.animate(withDuration: 0.5) {
+                let indexPath = IndexPath(item: index, section: 0)
+                self?.collection.deleteItems(at: [indexPath])
+            }
+        }
     }
 }
 
@@ -95,11 +112,7 @@ extension ViewController: UICollectionViewDataSource, UICollectionViewDelegateFl
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        dataSource -= 1
-        
-        UIView.animate(withDuration: 0.5) { [weak collectionView] in
-            collectionView?.deleteItems(at: [indexPath])
-        }
+        deleteItem(at: indexPath.row)
     }
 }
 
