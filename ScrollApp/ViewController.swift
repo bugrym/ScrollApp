@@ -20,9 +20,9 @@ class ViewController: UIViewController {
     private var collection: UICollectionView!
     private var dataSource: Int = 0 {
         didSet {
-            collection.reloadData()
-            let indexPath = IndexPath(item: dataSource - 1, section: 0)
-            collection.scrollToItem(at: indexPath, at: .right, animated: true)
+//            collection.reloadData()
+//            let indexPath = IndexPath(item: dataSource - 1, section: 0)
+//            collection.scrollToItem(at: indexPath, at: .right, animated: true)
         }
     }
     
@@ -72,6 +72,10 @@ class ViewController: UIViewController {
     @objc private
     func addBtnTap() {
         dataSource += 1
+        
+        collection.reloadData()
+        let indexPath = IndexPath(item: dataSource - 1, section: 0)
+        collection.scrollToItem(at: indexPath, at: .right, animated: true)
     }
 }
 
@@ -88,6 +92,14 @@ extension ViewController: UICollectionViewDataSource, UICollectionViewDelegateFl
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: 150, height: 150)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        dataSource -= 1
+        
+        UIView.animate(withDuration: 0.5) { [weak collectionView] in
+            collectionView?.deleteItems(at: [indexPath])
+        }
     }
 }
 
